@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/icons.php";
 $page_title = $page_title ?? "Dashboard";
 $user = current_user();
 ?>

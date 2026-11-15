@@ -21,3 +21,18 @@ function require_role(array $roles): void {
         exit("Akses ditolak. Anda tidak memiliki izin untuk membuka halaman ini.");
     }
 }
+
+function is_warga_logged_in(): bool {
+    return !empty($_SESSION['warga']);
+}
+
+function current_warga(): array {
+    return $_SESSION['warga'] ?? [];
+}
+
+function require_warga_or_user(): void {
+    if (empty($_SESSION['user']) && empty($_SESSION['warga'])) {
+        header("Location: login.php");
+        exit;
+    }
+}

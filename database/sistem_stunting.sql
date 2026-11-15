@@ -3,8 +3,9 @@ USE db_stunting;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(120) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
+    nama VARCHAR(120) NOT NULL,
+    username VARCHAR(60) NOT NULL UNIQUE,
+    email VARCHAR(150) NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('admin','petugas','orang_tua') NOT NULL DEFAULT 'orang_tua',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -17,7 +18,9 @@ CREATE TABLE IF NOT EXISTS anak (
     tanggal_lahir DATE NOT NULL,
     jenis_kelamin ENUM('L','P') NOT NULL,
     nama_ibu VARCHAR(120) NULL,
+    nama_ayah VARCHAR(120) NULL,
     alamat TEXT NULL,
+    no_hp VARCHAR(20) NULL,
     user_orang_tua_id INT UNSIGNED NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_anak_orangtua FOREIGN KEY (user_orang_tua_id) REFERENCES users(id) ON DELETE SET NULL
@@ -30,11 +33,14 @@ CREATE TABLE IF NOT EXISTS pemeriksaan (
     berat_kg DECIMAL(5,2) NOT NULL,
     tinggi_cm DECIMAL(5,2) NOT NULL,
     jenis_pengukuran ENUM('PB','TB') NOT NULL,
+    umur_bulan INT UNSIGNED NOT NULL DEFAULT 0,
+    zscore_tbu DECIMAL(4,2) NULL,
+    status_tbu ENUM('Sangat Pendek','Pendek','Normal','Tinggi') NOT NULL DEFAULT 'Normal',
+    zscore_bbu DECIMAL(4,2) NULL,
+    status_bbu ENUM('Sangat Kurang','Kurang','Normal','Risiko Lebih') NOT NULL DEFAULT 'Normal',
     catatan TEXT NULL,
     petugas_id INT UNSIGNED NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_periksa_anak FOREIGN KEY (anak_id) REFERENCES anak(id) ON DELETE CASCADE,
     CONSTRAINT fk_periksa_petugas FOREIGN KEY (petugas_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
-
--- Belum ada akun bawaan. Buat admin pertama melalui setup_admin.php.
