@@ -1,12 +1,13 @@
-
 <?php
 require_once __DIR__ . "/config/database.php";
+require_once __DIR__ . "/includes/icons.php";
 
 $message = "";
+$is_error = false;
 $total = (int)$conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
 
 if ($total > 0) {
-    $message = "Akun pengguna sudah tersedia. Silakan login.";
+    $message = "Akun pengguna sudah tersedia. Silakan masuk melalui halaman login.";
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $nama = trim($_POST['nama'] ?? '');
@@ -14,10 +15,12 @@ if ($total > 0) {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if ($nama === '' || $username === '' || strlen($password) < 10) {
-        $message = "Nama, username wajib diisi dan password minimal 10 karakter.";
+    if ($nama === '' || $username === '' || strlen($password) < 8) {
+        $message = "Nama, username wajib diisi dan password minimal 8 karakter.";
+        $is_error = true;
     } elseif ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $message = "Format email tidak valid.";
+        $is_error = true;
     } else {
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $role = 'admin';
@@ -38,58 +41,74 @@ if ($total > 0) {
         );
 
         if ($stmt->execute()) {
-            $message = "Admin berhasil dibuat! Silakan login.";
+            $message = "Administrator berhasil dibuat! Silakan masuk.";
+            $is_error = false;
         } else {
-            $message = "Gagal membuat admin: " . $stmt->error;
+            $message = "Gagal membuat administrator: " . $stmt->error;
+            $is_error = true;
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Setup Admin SiTumbuh</title>
+    <title>Inisialisasi Administrator - SiTumbuh</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="login-page">
 
 <main class="login-card">
+    <div class="login-brand">
+        <span class="brand-mark" style="width:36px; height:36px;"><?= ui_icon('shield', '', 18) ?></span>
+        <div>
+            <strong style="font:700 16px 'Plus Jakarta Sans'; color:var(--ink); display:block;">SiTumbuh</strong>
+            <small style="color:var(--muted); font-size:11px;">Deteksi Dini Risiko Stunting</small>
+        </div>
+    </div>
 
-    <h1>Buat Admin SiTumbuh</h1>
-    <p class="muted">Buat akun administrator pertama.</p>
+    <h1>Inisialisasi Administrator</h1>
+    <p class="muted" style="margin-bottom:20px;">Buat akun administrator utama untuk mengelola sistem.</p>
 
     <?php if ($message): ?>
-        <div class="alert">
-            <?= htmlspecialchars($message) ?>
+        <div class="alert <?= $is_error ? 'alert-danger' : 'alert-success' ?>" style="margin-bottom:18px;">
+            <?= ui_icon($is_error ? 'alert-circle' : 'check-circle', '', 16) ?> <?= htmlspecialchars($message) ?>
         </div>
     <?php endif; ?>
 
     <?php if ($total === 0): ?>
     <form method="POST">
+        <div class="form-group" style="margin-bottom:14px;">
+            <label>Nama Lengkap</label>
+            <input type="text" name="nama" class="form-control" required placeholder="Administrator SiTumbuh">
+        </div>
 
-        <label>Nama Lengkap</label>
-        <input type="text" name="nama" required>
+        <div class="form-group" style="margin-bottom:14px;">
+            <label>Username</label>
+            <input type="text" name="username" class="form-control" required placeholder="admin">
+        </div>
 
-        <label>Username</label>
-        <input type="text" name="username" required>
+        <div class="form-group" style="margin-bottom:14px;">
+            <label>Email (Opsional)</label>
+            <input type="email" name="email" class="form-control" placeholder="admin@situmbuh.id">
+        </div>
 
-        <label>Email (opsional)</label>
-        <input type="email" name="email">
+        <div class="form-group" style="margin-bottom:20px;">
+            <label>Password (Minimal 8 Karakter)</label>
+            <input type="password" name="password" class="form-control" minlength="8" required placeholder="Password kuat">
+        </div>
 
-        <label>Password</label>
-        <input type="password" name="password"
-               minlength="10" required>
-
-        <button class="primary-button" type="submit">
-            Buat Akun Admin
+        <button class="btn btn-primary" type="submit" style="width:100%; padding:11px;">
+            Buat Akun Administrator
         </button>
-
     </form>
+    <?php else: ?>
+        <a href="login.php" class="btn btn-primary" style="width:100%; padding:11px;">
+            Menuju Halaman Login
+        </a>
     <?php endif; ?>
-
 </main>
 </body>
 </html>
