@@ -1,0 +1,7 @@
+.git
+.gitignore
+.agents
+.gemini
+database/*.sql
+database/seed_dummy.php
+database/reset_dummy.php
