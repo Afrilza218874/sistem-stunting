@@ -71,8 +71,8 @@ include __DIR__ . "/includes/sidebar.php";
     <section class="welcome-panel">
         <div>
             <span class="pill"><?= ui_icon('shield', '', 12) ?> Sistem SiTumbuh Aktif</span>
-            <h2>Selamat datang, <?= htmlspecialchars($user['name']) ?></h2>
-            <p>Sistem pencatatan tumbuh kembang dan deteksi dini stunting balita wilayah Posyandu berdasarkan Standar Antropometri Kemenkes RI (Permenkes No. 2/2020).</p>
+            <h2>Selamat datang, <?= htmlspecialchars($user['nama'] ?? $user['name'] ?? 'Petugas') ?></h2>
+            <p>Pencatatan tumbuh kembang dan skrining deteksi dini stunting balita Posyandu.</p>
             
             <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
                 <?php if (in_array($user['role'] ?? '', ['admin', 'petugas'], true)): ?>
@@ -205,46 +205,37 @@ include __DIR__ . "/includes/sidebar.php";
         <article class="panel">
             <div class="panel-heading">
                 <div>
-                    <h3>Alur Intervensi Stunting Posyandu</h3>
-                    <p>Langkah penanganan balita berisiko stunting.</p>
+                    <h3>Alur Tindakan Posyandu</h3>
+                    <p>3 langkah cepat pemantauan balita.</p>
                 </div>
             </div>
             
             <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
-                <div style="display:flex; gap:12px; align-items:flex-start;">
-                    <div style="width:24px; height:24px; border-radius:50%; background:var(--primary-light); color:var(--primary-dark); display:grid; place-items:center; font-weight:700; font-size:11px; flex-shrink:0;">1</div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <div style="width:26px; height:26px; border-radius:50%; background:var(--primary-light); color:var(--primary-dark); display:grid; place-items:center; font-weight:700; font-size:12px; flex-shrink:0;">1</div>
                     <div>
-                        <strong style="font-size:13px; color:var(--ink);">Skrining Rutin Bulanan</strong>
-                        <p style="font-size:12px; color:var(--ink-secondary); margin:2px 0 0; line-height:1.5;">Pengukuran tinggi/panjang dan berat badan secara berkala di Posyandu.</p>
+                        <strong style="font-size:13px; color:var(--ink);">Pengukuran Rutin</strong>
+                        <p style="font-size:12px; color:var(--muted); margin:0;">Timbang BB dan ukur TB/PB balita setiap bulan.</p>
                     </div>
                 </div>
 
-                <div style="display:flex; gap:12px; align-items:flex-start;">
-                    <div style="width:24px; height:24px; border-radius:50%; background:var(--primary-light); color:var(--primary-dark); display:grid; place-items:center; font-weight:700; font-size:11px; flex-shrink:0;">2</div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <div style="width:26px; height:26px; border-radius:50%; background:var(--primary-light); color:var(--primary-dark); display:grid; place-items:center; font-weight:700; font-size:12px; flex-shrink:0;">2</div>
                     <div>
-                        <strong style="font-size:13px; color:var(--ink);">Deteksi Nilai Z-Score</strong>
-                        <p style="font-size:12px; color:var(--ink-secondary); margin:2px 0 0; line-height:1.5;">Jika indikator TB/U berada di bawah -2 SD, balita masuk kriteria stunting (pendek/sangat pendek).</p>
+                        <strong style="font-size:13px; color:var(--ink);">Deteksi Z-Score</strong>
+                        <p style="font-size:12px; color:var(--muted); margin:0;">Sistem mengelompokkan risiko secara instan.</p>
                     </div>
                 </div>
 
-                <div style="display:flex; gap:12px; align-items:flex-start;">
-                    <div style="width:24px; height:24px; border-radius:50%; background:var(--primary-light); color:var(--primary-dark); display:grid; place-items:center; font-weight:700; font-size:11px; flex-shrink:0;">3</div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <div style="width:26px; height:26px; border-radius:50%; background:var(--primary-light); color:var(--primary-dark); display:grid; place-items:center; font-weight:700; font-size:12px; flex-shrink:0;">3</div>
                     <div>
-                        <strong style="font-size:13px; color:var(--ink);">Pendampingan & Rujukan</strong>
-                        <p style="font-size:12px; color:var(--ink-secondary); margin:2px 0 0; line-height:1.5;">Edukasi konsumsi protein hewani harian, sanitasi lingkungan rumah, dan rujukan ke Puskesmas bila Z &lt; -3 SD.</p>
+                        <strong style="font-size:13px; color:var(--ink);">Tindak Lanjut &amp; Rujukan</strong>
+                        <p style="font-size:12px; color:var(--muted); margin:0;">Edukasi protein hewani / rujukan ke Puskesmas jika Z &lt; -2 SD.</p>
                     </div>
                 </div>
-            </div>
-
-            <div style="border-top:1px solid var(--line-light); padding-top:12px; margin-top:16px; font-size:11px; color:var(--muted); line-height:1.6;">
-                Sumber: Pedoman Pencegahan Stunting Nasional & Standar Antropometri Kemenkes RI.
             </div>
         </article>
     </section>
-
-    <footer class="page-footer" style="text-align:center; color:var(--muted); font-size:11px; padding:28px 0 5px;">
-        SiTumbuh · Sistem Informasi Pemantauan Pertumbuhan & Deteksi Dini Stunting
-    </footer>
-</main>
 
 <?php include __DIR__ . "/includes/footer.php"; ?>

@@ -1,14 +1,16 @@
 <?php
 require_once __DIR__ . "/includes/auth.php";
-require_role(['admin', 'petugas']);
+require_login();
+require_admin_or_petugas();
 require_once __DIR__ . "/config/database.php";
 
-$page_title = "Tambah Balita";
+$page_title = "Tambah Balita Baru";
 $user = current_user();
+
 $error = "";
 $success = "";
 
-// Ambil daftar akun orang tua untuk mapping
+// Mengambil daftar akun orang tua jika ada
 $parents = $conn->query("SELECT id, nama, username FROM users WHERE role = 'orang_tua' ORDER BY nama ASC");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -22,11 +24,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $no_hp = trim($_POST['no_hp'] ?? '');
     $user_orang_tua_id = !empty($_POST['user_orang_tua_id']) ? (int)$_POST['user_orang_tua_id'] : null;
 
-    if ($nama === '' || $tanggal_lahir === '' || !in_array($jenis_kelamin, ['L', 'P'], true)) {
-        $error = "Nama balita, tanggal lahir, dan jenis kelamin wajib diisi.";
+    if ($nama === '' || $tanggal_lahir === '' || $jenis_kelamin === '') {
+        $error = "Nama, tanggal lahir, dan jenis kelamin wajib diisi.";
+    } elseif ($tanggal_lahir > date('Y-m-d')) {
+        $error = "Tanggal lahir tidak boleh lebih dari hari ini.";
     } else {
         $stmt = $conn->prepare(
-            "INSERT INTO anak (nama, nik, tanggal_lahir, jenis_kelamin, nama_ibu, nama_ayah, alamat, no_hp, user_orang_tua_id)
+            "INSERT INTO anak (nama, nik, tanggal_lahir, jenis_kelamin, nama_ibu, nama_ayah, alamat, no_hp, user_orang_tua_id) 
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         $nikVal = $nik !== '' ? $nik : null;
@@ -67,32 +71,32 @@ include __DIR__ . "/includes/sidebar.php";
     </div>
 
     <?php if ($error): ?>
-        <div class="alert alert-danger" style="margin-bottom:16px;">
+        <div class="alert alert-danger" style="margin-bottom:16px;" role="alert">
             <?= ui_icon('alert-circle', '', 16) ?> <?= htmlspecialchars($error) ?>
         </div>
     <?php endif; ?>
 
     <div class="form-card">
         <form method="POST">
-            <h3 style="font:700 14px 'Plus Jakarta Sans'; margin:0 0 16px; color:var(--ink); border-bottom:1px solid var(--line-light); padding-bottom:8px;">
+            <h3 style="font-size:15px; font-weight:700; margin:0 0 16px; color:var(--ink); border-bottom:1px solid var(--line-light); padding-bottom:8px;">
                 Identitas Balita
             </h3>
             
             <div class="form-grid">
                 <div class="form-group span-2">
-                    <label>Nama Lengkap Balita <span style="color:var(--danger);">*</span></label>
-                    <input type="text" name="nama" class="form-control" placeholder="Contoh: Muhammad Rayhan" required value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>">
+                    <label for="input_nama">Nama Lengkap Balita <span style="color:var(--danger);">*</span></label>
+                    <input type="text" id="input_nama" name="nama" class="form-control" placeholder="Contoh: Muhammad Rayhan" required value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>">
                 </div>
 
                 <div class="form-group">
-                    <label>NIK Balita (16 Digit)</label>
-                    <input type="text" name="nik" class="form-control" maxlength="20" placeholder="Kosongkan jika belum ada" value="<?= htmlspecialchars($_POST['nik'] ?? '') ?>">
+                    <label for="input_nik">NIK Balita (16 Digit)</label>
+                    <input type="text" id="input_nik" name="nik" class="form-control" maxlength="20" placeholder="Kosongkan jika belum ada" value="<?= htmlspecialchars($_POST['nik'] ?? '') ?>">
                     <span class="form-hint">Nomor Induk Kependudukan dari KK atau KIA</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Jenis Kelamin <span style="color:var(--danger);">*</span></label>
-                    <select name="jenis_kelamin" class="form-control" required>
+                    <label for="select_jk">Jenis Kelamin <span style="color:var(--danger);">*</span></label>
+                    <select id="select_jk" name="jenis_kelamin" class="form-control" required>
                         <option value="">-- Pilih Jenis Kelamin --</option>
                         <option value="L" <?= ($_POST['jenis_kelamin'] ?? '') === 'L' ? 'selected' : '' ?>>Laki-laki (L)</option>
                         <option value="P" <?= ($_POST['jenis_kelamin'] ?? '') === 'P' ? 'selected' : '' ?>>Perempuan (P)</option>
@@ -100,41 +104,41 @@ include __DIR__ . "/includes/sidebar.php";
                 </div>
 
                 <div class="form-group span-2">
-                    <label>Tanggal Lahir <span style="color:var(--danger);">*</span></label>
-                    <input type="date" name="tanggal_lahir" class="form-control" required max="<?= date('Y-m-d') ?>" value="<?= htmlspecialchars($_POST['tanggal_lahir'] ?? '') ?>">
+                    <label for="input_tgl_lahir">Tanggal Lahir <span style="color:var(--danger);">*</span></label>
+                    <input type="date" id="input_tgl_lahir" name="tanggal_lahir" class="form-control" required max="<?= date('Y-m-d') ?>" value="<?= htmlspecialchars($_POST['tanggal_lahir'] ?? '') ?>">
                     <span class="form-hint">Digunakan sebagai dasar penentuan usia bulan baku WHO</span>
                 </div>
             </div>
 
-            <h3 style="font:700 14px 'Plus Jakarta Sans'; margin:24px 0 16px; color:var(--ink); border-bottom:1px solid var(--line-light); padding-bottom:8px;">
+            <h3 style="font-size:15px; font-weight:700; margin:24px 0 16px; color:var(--ink); border-bottom:1px solid var(--line-light); padding-bottom:8px;">
                 Informasi Orang Tua / Wali
             </h3>
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Nama Ibu Kandung</label>
-                    <input type="text" name="nama_ibu" class="form-control" placeholder="Nama ibu" value="<?= htmlspecialchars($_POST['nama_ibu'] ?? '') ?>">
+                    <label for="input_ibu">Nama Ibu Kandung</label>
+                    <input type="text" id="input_ibu" name="nama_ibu" class="form-control" placeholder="Nama ibu" value="<?= htmlspecialchars($_POST['nama_ibu'] ?? '') ?>">
                 </div>
 
                 <div class="form-group">
-                    <label>Nama Ayah</label>
-                    <input type="text" name="nama_ayah" class="form-control" placeholder="Nama ayah" value="<?= htmlspecialchars($_POST['nama_ayah'] ?? '') ?>">
+                    <label for="input_ayah">Nama Ayah</label>
+                    <input type="text" id="input_ayah" name="nama_ayah" class="form-control" placeholder="Nama ayah" value="<?= htmlspecialchars($_POST['nama_ayah'] ?? '') ?>">
                 </div>
 
                 <div class="form-group">
-                    <label>Nomor Telepon / WhatsApp</label>
-                    <input type="text" name="no_hp" class="form-control" placeholder="08xxxxxxxxxx" value="<?= htmlspecialchars($_POST['no_hp'] ?? '') ?>">
+                    <label for="input_hp">Nomor Telepon / WhatsApp</label>
+                    <input type="text" id="input_hp" name="no_hp" class="form-control" placeholder="08xxxxxxxxxx" value="<?= htmlspecialchars($_POST['no_hp'] ?? '') ?>">
                 </div>
 
                 <div class="form-group">
-                    <label>Alamat / RT / Dusun</label>
-                    <input type="text" name="alamat" class="form-control" placeholder="Contoh: RT 02 RW 01 Dusun Krajan" value="<?= htmlspecialchars($_POST['alamat'] ?? '') ?>">
+                    <label for="input_alamat">Alamat / RT / Dusun</label>
+                    <input type="text" id="input_alamat" name="alamat" class="form-control" placeholder="Contoh: RT 02 RW 01 Dusun Krajan" value="<?= htmlspecialchars($_POST['alamat'] ?? '') ?>">
                 </div>
 
                 <?php if ($parents && $parents->num_rows > 0): ?>
                 <div class="form-group span-2">
-                    <label>Hubungkan Akun Pengguna Orang Tua</label>
-                    <select name="user_orang_tua_id" class="form-control">
+                    <label for="select_parent">Hubungkan Akun Pengguna Orang Tua</label>
+                    <select id="select_parent" name="user_orang_tua_id" class="form-control">
                         <option value="">-- Tanpa Akun Khusus --</option>
                         <?php while ($p = $parents->fetch_assoc()): ?>
                             <option value="<?= $p['id'] ?>" <?= ((int)($_POST['user_orang_tua_id'] ?? 0) === (int)$p['id']) ? 'selected' : '' ?>>
@@ -155,6 +159,5 @@ include __DIR__ . "/includes/sidebar.php";
             </div>
         </form>
     </div>
-</main>
 
 <?php include __DIR__ . "/includes/footer.php"; ?>

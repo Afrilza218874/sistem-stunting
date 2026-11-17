@@ -11,7 +11,16 @@ function require_login(): void {
 }
 
 function current_user(): array {
-    return $_SESSION['user'] ?? [];
+    $u = $_SESSION['user'] ?? [];
+    if (!empty($u)) {
+        if (!isset($u['nama']) && isset($u['name'])) {
+            $u['nama'] = $u['name'];
+        }
+        if (!isset($u['name']) && isset($u['nama'])) {
+            $u['name'] = $u['nama'];
+        }
+    }
+    return $u;
 }
 
 function require_role(array $roles): void {
@@ -20,6 +29,14 @@ function require_role(array $roles): void {
         http_response_code(403);
         exit("Akses ditolak. Anda tidak memiliki izin untuk membuka halaman ini.");
     }
+}
+
+function require_admin(): void {
+    require_role(['admin']);
+}
+
+function require_admin_or_petugas(): void {
+    require_role(['admin', 'petugas']);
 }
 
 function is_warga_logged_in(): bool {

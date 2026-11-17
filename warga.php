@@ -81,19 +81,19 @@ $today = date('Y-m-d');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informasi Tumbuh Kembang Balita - SiTumbuh</title>
+    <title>Cek Tumbuh Kembang Balita - SiTumbuh</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body style="background: var(--bg);">
+<body>
 
-<div class="warga-container">
+<main class="warga-container">
     <!-- Topbar Warga -->
     <header class="warga-topbar">
         <div style="display:flex; align-items:center; gap:12px;">
-            <span class="brand-mark" style="width:36px; height:36px;"><?= ui_icon('shield', '', 18) ?></span>
+            <span class="brand-mark" style="width:36px; height:36px;" aria-hidden="true"><?= ui_icon('shield', '', 18) ?></span>
             <div>
-                <strong style="font:700 16px 'Plus Jakarta Sans'; color:var(--ink); display:block;">SiTumbuh Warga</strong>
-                <small style="color:var(--muted); font-size:11px;">Layanan Informasi Posyandu & Edukasi Stunting</small>
+                <strong style="font-family:'Bricolage Grotesque', sans-serif; font-size:17px; font-weight:700; color:var(--ink); display:block;">SiTumbuh Warga</strong>
+                <small style="color:var(--muted); font-size:11px;">Hasil Pemeriksaan Posyandu</small>
             </div>
         </div>
         
@@ -104,68 +104,34 @@ $today = date('Y-m-d');
                 </a>
             <?php endif; ?>
             <a href="logout.php" class="btn btn-outline btn-sm">
-                <?= ui_icon('logout', '', 14) ?> Ganti Balita / Keluar
+                <?= ui_icon('logout', '', 14) ?> Keluar / Ganti Balita
             </a>
         </div>
     </header>
 
-    <!-- Banner Edukasi Singkat Stunting -->
-    <section class="warga-hero">
-        <span class="pill" style="margin-bottom:8px;"><?= ui_icon('info', '', 12) ?> Edukasi Kesehatan Balita</span>
-        <h2>Mengenal Stunting & Periode Emas 1.000 Hari</h2>
-        <p>
-            Stunting adalah kondisi terhambatnya pertumbuhan tinggi badan anak akibat kekurangan gizi kronis dalam jangka panjang, terutama pada <strong>1.000 Hari Pertama Kehidupan</strong> (sejak dalam kandungan hingga usia 2 tahun). Pemantauan rutin di Posyandu membantu orang tua mendeteksi dini dan mencegah dampak stunting pada kecerdasan anak.
-        </p>
-    </section>
-
-    <!-- 3 Kartu Edukasi Pencegahan -->
-    <section class="edu-grid">
-        <article class="edu-card">
-            <div class="edu-card-icon"><?= ui_icon('child', '', 16) ?></div>
-            <h4>1. Protein Hewani Harian</h4>
-            <p>Berikan minimal satu butir telur setiap hari, ikan kembung, ayam, atau hati sapi sebagai sumber zat gizi pembentuk tinggi badan dan otak anak.</p>
-        </article>
-
-        <article class="edu-card">
-            <div class="edu-card-icon"><?= ui_icon('scale', '', 16) ?></div>
-            <h4>2. Rutin Timbang di Posyandu</h4>
-            <p>Bawa balita ke Posyandu setiap bulan untuk menimbang berat dan mengukur tinggi badan agar grafik pertumbuhan terpantau sejak dini.</p>
-        </article>
-
-        <article class="edu-card">
-            <div class="edu-card-icon"><?= ui_icon('shield', '', 16) ?></div>
-            <h4>3. Sanitasi & Air Bersih</h4>
-            <p>Jaga kebersihan lingkungan, gunakan jamban sehat, dan biasakan cuci tangan pakai sabun untuk mencegah diare berulang yang menguras zat gizi anak.</p>
-        </article>
-    </section>
-
-    <!-- Pencarian Balita -->
-    <section class="warga-search-card">
-        <h3 style="font:700 16px 'Plus Jakarta Sans'; margin:0 0 6px; color:var(--ink);">Pencarian Data Balita</h3>
-        <p class="muted" style="margin:0 0 14px; font-size:12px;">Cari nama ananda untuk melihat hasil pemeriksaan penimbangan Posyandu terakhir.</p>
-
-        <form method="GET" style="display:flex; gap:10px; flex-wrap:wrap;">
-            <input type="text" name="cari" class="form-control" style="flex:1; min-width:260px;" placeholder="Ketik nama balita lain (misal: Muhammad Fathan / Naura)..." value="<?= htmlspecialchars($cari) ?>" required>
+    <!-- Pencarian Cepat Balita (To the point di bagian atas) -->
+    <section class="warga-search-card" style="margin-bottom:20px;">
+        <form method="GET" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <label for="warga_cari_input" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;">Nama Balita</label>
+            <input type="text" id="warga_cari_input" name="cari" class="form-control" style="flex:1; min-width:240px;" placeholder="Ketik nama balita (misal: Muhammad Fathan / Kenzo)..." value="<?= htmlspecialchars($cari) ?>" required>
             <button type="submit" class="btn btn-primary">
-                <?= ui_icon('search', '', 14) ?> Cari Balita
+                <?= ui_icon('search', '', 14) ?> Cari
             </button>
             <?php if (!empty($warga['nama']) && $cari !== $warga['nama']): ?>
                 <a href="warga.php?cari=<?= urlencode($warga['nama']) ?>" class="btn btn-secondary">
-                    Kembali ke Ananda (<?= htmlspecialchars($warga['nama']) ?>)
+                    Balita Saya (<?= htmlspecialchars($warga['nama']) ?>)
                 </a>
             <?php endif; ?>
         </form>
 
         <?php if (count($hasil_pencarian) > 1): ?>
-            <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--line-light); font-size:12px;">
-                <span class="muted">Ditemukan beberapa nama yang mirip:</span>
-                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
-                    <?php foreach ($hasil_pencarian as $h): ?>
-                        <a href="warga.php?cari=<?= urlencode($cari) ?>&id=<?= $h['id'] ?>" class="btn <?= ($anak_terpilih && (int)$anak_terpilih['id'] === (int)$h['id']) ? 'btn-primary' : 'btn-outline' ?> btn-sm">
-                            <?= htmlspecialchars($h['nama']) ?> (Ibu: <?= htmlspecialchars($h['nama_ibu'] ?: '—') ?>)
-                        </a>
-                    <?php endforeach; ?>
-                </div>
+            <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--line-light); font-size:12px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                <span class="muted">Pilih balita:</span>
+                <?php foreach ($hasil_pencarian as $h): ?>
+                    <a href="warga.php?cari=<?= urlencode($cari) ?>&amp;id=<?= $h['id'] ?>" class="btn <?= ($anak_terpilih && (int)$anak_terpilih['id'] === (int)$h['id']) ? 'btn-primary' : 'btn-outline' ?> btn-sm">
+                        <?= htmlspecialchars($h['nama']) ?> (Ibu: <?= htmlspecialchars($h['nama_ibu'] ?: '—') ?>)
+                    </a>
+                <?php endforeach; ?>
             </div>
         <?php endif; ?>
     </section>
@@ -175,61 +141,63 @@ $today = date('Y-m-d');
         $usia_anak = format_umur($anak_terpilih['tanggal_lahir'], $today);
     ?>
         <article class="result-card-warga">
-            <!-- Identitas Header -->
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; border-bottom:1px solid var(--line-light); padding-bottom:16px;">
+            <!-- Header Identitas -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; border-bottom:1px solid var(--line-light); padding-bottom:14px;">
                 <div>
-                    <span class="pill" style="margin-bottom:6px;"><?= $anak_terpilih['jenis_kelamin'] === 'L' ? 'Anak Laki-laki' : 'Anak Perempuan' ?></span>
-                    <h2 style="font:700 22px 'Plus Jakarta Sans'; margin:2px 0 4px; color:var(--ink);">
+                    <span class="badge <?= $anak_terpilih['jenis_kelamin'] === 'L' ? 'badge-gender-l' : 'badge-gender-p' ?>">
+                        <?= $anak_terpilih['jenis_kelamin'] === 'L' ? 'Laki-laki' : 'Perempuan' ?>
+                    </span>
+                    <h2 style="font-size:22px; margin:4px 0 2px; color:var(--ink);">
                         <?= htmlspecialchars($anak_terpilih['nama']) ?>
                     </h2>
                     <p class="muted" style="margin:0; font-size:12px;">
-                        Lahir: <?= date('d F Y', strtotime($anak_terpilih['tanggal_lahir'])) ?> · Usia saat ini: <strong><?= $usia_anak ?></strong> · Ibu: <strong><?= htmlspecialchars($anak_terpilih['nama_ibu'] ?: '—') ?></strong>
+                        Lahir: <strong><?= date('d/m/Y', strtotime($anak_terpilih['tanggal_lahir'])) ?></strong> (Usia: <strong><?= $usia_anak ?></strong>) &bull; Ibu: <strong><?= htmlspecialchars($anak_terpilih['nama_ibu'] ?: '—') ?></strong>
                     </p>
                 </div>
                 
-                <div>
-                    <span class="muted" style="font-size:11px; display:block;">Alamat Terdaftar:</span>
-                    <span style="font-size:12px; font-weight:600; color:var(--ink);"><?= htmlspecialchars($anak_terpilih['alamat'] ?: 'Dusun Desa Posyandu') ?></span>
+                <div style="text-align:right;">
+                    <span class="muted" style="font-size:11px;">Alamat:</span>
+                    <div style="font-size:12px; font-weight:600; color:var(--ink);"><?= htmlspecialchars($anak_terpilih['alamat'] ?: 'Dusun Desa') ?></div>
                 </div>
             </div>
 
             <?php if ($pemeriksaan_terakhir): 
                 $status_tbu = $pemeriksaan_terakhir['status_tbu'];
                 $callout_class = 'normal';
-                $status_title = 'Pertumbuhan Ananda Berjalan Optimal dan Normal';
-                $status_desc = 'Alhamdulillah, tinggi badan ananda sesuai dengan standar rata-rata anak seusianya. Terus jaga pola makan bergizi seimbang dan hadir rutin di Posyandu.';
+                $status_title = 'Pertumbuhan Normal';
+                $status_desc = 'Tinggi badan ananda sesuai standar seusianya. Pertahankan pola asuh dan hadir rutin di Posyandu.';
 
                 if ($status_tbu === 'Sangat Pendek') {
                     $callout_class = 'danger';
-                    $status_title = 'Perhatian Khusus: Terindikasi Sangat Pendek (Stunting Berat)';
-                    $status_desc = 'Tinggi badan ananda saat ini berada jauh di bawah rata-rata balita seusianya. Kami menyarankan Ayah/Bunda berkonsultasi langsung dengan Bidan Desa atau Petugas Puskesmas untuk evaluasi gizi intensif.';
+                    $status_title = 'Perhatian: Sangat Pendek (Risiko Stunting Berat)';
+                    $status_desc = 'Tinggi badan ananda berada di bawah standar. Disarankan konsultasi dengan Bidan Desa / Puskesmas untuk evaluasi gizi.';
                 } elseif ($status_tbu === 'Pendek') {
                     $callout_class = 'warning';
-                    $status_title = 'Perhatian: Terindikasi Pendek (Risiko Stunting)';
-                    $status_desc = 'Tinggi badan ananda saat ini masih berada di bawah garis normal seusianya. Kondisi ini dapat dikejar dengan menambah porsi protein hewani harian (seperti telur dan ikan) dan memantau perkembangannya tiap bulan.';
+                    $status_title = 'Perhatian: Pendek (Risiko Stunting)';
+                    $status_desc = 'Tinggi badan ananda masih di bawah normal. Tambah asupan protein hewani harian (telur/ikan) dan pantau bulan depan.';
                 } elseif ($status_tbu === 'Tinggi') {
                     $callout_class = 'normal';
-                    $status_title = 'Pertumbuhan Tinggi Badan Sangat Baik';
-                    $status_desc = 'Tinggi badan ananda berada di atas rata-rata usianya dengan pertumbuhan yang sangat baik. Pertahankan pola asuh dan gizi sehat.';
+                    $status_title = 'Pertumbuhan Sangat Baik (Tinggi)';
+                    $status_desc = 'Tinggi badan ananda di atas rata-rata seusianya dengan pertumbuhan yang sangat baik.';
                 }
             ?>
-                <!-- Kotak Callout Bahasa Ramah -->
+                <!-- Status Box Ringkas -->
                 <div class="status-callout <?= $callout_class ?>">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:16px; font-weight:800;"><?= ui_icon($callout_class === 'normal' ? 'check-circle' : 'alert-circle', '', 18) ?></span>
+                        <span aria-hidden="true"><?= ui_icon($callout_class === 'normal' ? 'check-circle' : 'alert-circle', '', 18) ?></span>
                         <strong style="font-size:15px;"><?= $status_title ?></strong>
                     </div>
-                    <p style="margin:8px 0 0; font-size:13px; line-height:1.6;">
+                    <p style="margin:6px 0 0; font-size:13px; line-height:1.5;">
                         <?= $status_desc ?>
                     </p>
                 </div>
 
-                <!-- 3 Angka Ringkasan Pengukuran -->
+                <!-- 3 Angka Pengukuran Terakhir -->
                 <div class="growth-stat-grid">
                     <div class="growth-stat-box">
                         <small>Tinggi / Panjang Badan</small>
                         <strong><?= number_format($pemeriksaan_terakhir['tinggi_cm'], 1) ?> cm</strong>
-                        <span style="font-size:11px; color:var(--muted);"><?= $pemeriksaan_terakhir['jenis_pengukuran'] === 'PB' ? 'Ukur Telentang (PB)' : 'Ukur Berdiri (TB)' ?></span>
+                        <span style="font-size:11px; color:var(--muted);"><?= $pemeriksaan_terakhir['jenis_pengukuran'] === 'PB' ? 'Ukur Telentang' : 'Ukur Berdiri' ?></span>
                     </div>
 
                     <div class="growth-stat-box">
@@ -240,40 +208,41 @@ $today = date('Y-m-d');
 
                     <div class="growth-stat-box">
                         <small>Pemeriksaan Terakhir</small>
-                        <strong><?= date('d M Y', strtotime($pemeriksaan_terakhir['tanggal_periksa'])) ?></strong>
-                        <span style="font-size:11px; color:var(--muted);">Usia periksa: <?= $pemeriksaan_terakhir['umur_bulan'] ?> bulan</span>
+                        <strong><?= date('d/m/Y', strtotime($pemeriksaan_terakhir['tanggal_periksa'])) ?></strong>
+                        <span style="font-size:11px; color:var(--muted);">Usia periksa: <?= $pemeriksaan_terakhir['umur_bulan'] ?> bln</span>
                     </div>
                 </div>
 
-                <!-- Tips Gizi Praktis di Rumah -->
-                <div style="background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:16px; margin:20px 0;">
-                    <strong style="font-size:13px; color:var(--ink); display:flex; align-items:center; gap:6px;">
-                        <?= ui_icon('info', '', 14) ?> Tips Gizi & Pengasuhan untuk Ayah & Bunda:
-                    </strong>
-                    <ul style="padding-left:18px; margin:8px 0 0; font-size:12px; color:var(--ink-secondary); line-height:1.7;">
-                        <li><strong>Protein Hewani:</strong> Usahakan ananda makan minimal 1 butir telur rebus atau ikan lokal setiap hari.</li>
-                        <li><strong>Camilan Bergizi:</strong> Ganti camilan manis/kemasan dengan buah segar, olahan tahu/tempe, atau bubur kacang hijau.</li>
-                        <li><strong>Minum Air Matang:</strong> Selalu berikan air minum yang sudah dimasak mendidih untuk mencegah kuman penyakit.</li>
-                        <li><strong>Posyandu Bulan Depan:</strong> Jangan lewatkan jadwal penimbangan berikutnya untuk melihat peningkatan berat dan tinggi ananda.</li>
-                    </ul>
+                <!-- 3 Poin Penting di Rumah (To the point) -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin:16px 0;">
+                    <div style="background:#ffffff; border:1px solid var(--line); border-radius:var(--radius-control); padding:10px 12px; font-size:12px;">
+                        <strong style="color:var(--primary-dark); display:block; margin-bottom:2px;">1. Protein Hewani Harian</strong>
+                        <span class="muted">Minimal 1 butir telur atau ikan setiap hari.</span>
+                    </div>
+                    <div style="background:#ffffff; border:1px solid var(--line); border-radius:var(--radius-control); padding:10px 12px; font-size:12px;">
+                        <strong style="color:var(--primary-dark); display:block; margin-bottom:2px;">2. Timbang Rutin</strong>
+                        <span class="muted">Hadir tiap bulan di jadwal Posyandu.</span>
+                    </div>
+                    <div style="background:#ffffff; border:1px solid var(--line); border-radius:var(--radius-control); padding:10px 12px; font-size:12px;">
+                        <strong style="color:var(--primary-dark); display:block; margin-bottom:2px;">3. Air Minum Matang</strong>
+                        <span class="muted">Cegah diare infeksius pada anak.</span>
+                    </div>
                 </div>
 
-                <!-- Tabel Riwayat Penimbangan Bulan demi Bulan -->
-                <div style="margin-top:24px;">
-                    <h4 style="font:700 14px 'Plus Jakarta Sans'; margin:0 0 10px; color:var(--ink);">
-                        Riwayat Penimbangan Bulanan di Posyandu
-                    </h4>
+                <!-- Riwayat Penimbangan Bulanan -->
+                <div style="margin-top:20px;">
+                    <h3 style="margin:0 0 10px; font-size:15px;">Riwayat Penimbangan Posyandu</h3>
                     
-                    <div class="data-table-container" style="box-shadow:none;">
+                    <div class="data-table-container">
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Tanggal Posyandu</th>
-                                    <th>Usia Saat Ukur</th>
-                                    <th>Tinggi Badan</th>
-                                    <th>Berat Badan</th>
+                                    <th>Tanggal</th>
+                                    <th>Usia</th>
+                                    <th>Tinggi</th>
+                                    <th>Berat</th>
                                     <th>Status Pertumbuhan</th>
-                                    <th>Catatan Petugas</th>
+                                    <th>Catatan</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -286,11 +255,11 @@ $today = date('Y-m-d');
                                 ?>
                                     <tr>
                                         <td><strong><?= date('d/m/Y', strtotime($rp['tanggal_periksa'])) ?></strong></td>
-                                        <td><?= $rp['umur_bulan'] ?> bulan</td>
+                                        <td><?= $rp['umur_bulan'] ?> bln</td>
                                         <td><?= number_format($rp['tinggi_cm'], 1) ?> cm</td>
                                         <td><?= number_format($rp['berat_kg'], 2) ?> kg</td>
                                         <td><span class="badge <?= $b_class ?>"><?= htmlspecialchars($rp['status_tbu']) ?></span></td>
-                                        <td><small class="muted"><?= htmlspecialchars($rp['catatan'] ?: 'Kondisi sehat') ?></small></td>
+                                        <td><small class="muted"><?= htmlspecialchars($rp['catatan'] ?: 'Sehat') ?></small></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -299,27 +268,28 @@ $today = date('Y-m-d');
                 </div>
 
             <?php else: ?>
-                <div class="empty-state" style="padding:32px 20px;">
-                    <div class="empty-state-icon"><?= ui_icon('scale', '', 36) ?></div>
+                <div class="empty-state" style="padding:24px 20px;">
+                    <div class="empty-state-icon"><?= ui_icon('scale', '', 32) ?></div>
                     <h3>Belum ada data penimbangan</h3>
-                    <p>Ananda <strong><?= htmlspecialchars($anak_terpilih['nama']) ?></strong> sudah terdaftar, namun belum memiliki rekam hasil penimbangan di Posyandu. Silakan hadir pada jadwal buka Posyandu berikutnya.</p>
+                    <p>Ananda <strong><?= htmlspecialchars($anak_terpilih['nama']) ?></strong> sudah terdaftar, silakan hadir di hari buka Posyandu berikutnya.</p>
                 </div>
             <?php endif; ?>
         </article>
     <?php else: ?>
         <article class="result-card-warga">
-            <div class="empty-state">
-                <div class="empty-state-icon"><?= ui_icon('search', '', 36) ?></div>
+            <div class="empty-state" style="padding:32px 20px;">
+                <div class="empty-state-icon"><?= ui_icon('search', '', 32) ?></div>
                 <h3>Balita Tidak Ditemukan</h3>
-                <p>Data dengan pencarian "<strong><?= htmlspecialchars($cari) ?></strong>" tidak ditemukan di pencatatan Posyandu. Pastikan ejaan nama sudah benar atau hubungi kader Posyandu desa Anda.</p>
+                <p>Data "<strong><?= htmlspecialchars($cari) ?></strong>" tidak ditemukan. Pastikan nama sesuai atau hubungi kader Posyandu desa.</p>
             </div>
         </article>
     <?php endif; ?>
 
-    <footer style="text-align:center; padding:24px 0; color:var(--muted); font-size:11px;">
-        SiTumbuh · Sistem Informasi Posyandu & Deteksi Dini Stunting Balita · KKN
+    <footer class="app-footer no-print">
+        <p><strong>SiTumbuh Warga</strong> &mdash; Informasi Posyandu Balita</p>
+        <small>Posyandu &amp; KKN Desa</small>
     </footer>
-</div>
+</main>
 
 </body>
 </html>

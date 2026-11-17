@@ -59,35 +59,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } else {
-        // Login petugas / kader / admin
+        // Login petugas / kader / admin menggunakan username & password
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
 
-        $stmt = $conn->prepare(
-            "SELECT id, nama, username, email, password, role
-             FROM users
-             WHERE username = ?
-             LIMIT 1"
-        );
-
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $account = $stmt->get_result()->fetch_assoc();
-
-        if ($account && password_verify($password, $account['password'])) {
-            session_regenerate_id(true);
-            $_SESSION['user'] = [
-                'id' => $account['id'],
-                'name' => $account['nama'],
-                'username' => $account['username'],
-                'email' => $account['email'],
-                'role' => $account['role']
-            ];
-            header("Location: index.php");
-            exit;
-        } else {
-            $error = "Username atau password yang Anda masukkan salah.";
+        if ($username === '' || $password === '') {
+            $error = "Username dan password wajib diisi untuk akses petugas.";
             $active_tab = 'petugas';
+        } else {
+            $stmt = $conn->prepare("SELECT id, nama, username, password, role FROM users WHERE username = ?");
+            $stmt->bind_param("s", $username);
+            $stmt->execute();
+            $res = $stmt->get_result();
+
+            if ($user = $res->fetch_assoc()) {
+                if (password_verify($password, $user['password'])) {
+                    $_SESSION['user'] = [
+                        'id' => $user['id'],
+                        'nama' => $user['nama'],
+                        'username' => $user['username'],
+                        'role' => $user['role']
+                    ];
+                    header("Location: index.php");
+                    exit;
+                } else {
+                    $error = "Password yang Anda masukkan salah.";
+                    $active_tab = 'petugas';
+                }
+            } else {
+                $error = "Akun petugas dengan username tersebut tidak ditemukan.";
+                $active_tab = 'petugas';
+            }
         }
     }
 }
@@ -96,90 +98,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Masuk - SiTumbuh</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk Sistem - SiTumbuh Posyandu</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="login-page">
 
-<main class="login-card" style="width: min(100%, 460px);">
-    <div class="login-brand">
-        <span class="brand-mark" style="width:36px; height:36px;"><?= ui_icon('shield', '', 18) ?></span>
+<main class="login-card">
+    <header class="login-brand">
+        <span class="brand-mark" aria-hidden="true"><?= ui_icon('shield', '', 20) ?></span>
         <div>
-            <strong style="font:700 16px 'Plus Jakarta Sans'; color:var(--ink); display:block;">SiTumbuh</strong>
-            <small style="color:var(--muted); font-size:11px;">Sistem Informasi Posyandu & Deteksi Stunting</small>
+            <strong style="font-family:'Bricolage Grotesque', sans-serif; font-size:18px; font-weight:700; color:var(--ink); display:block;">SiTumbuh</strong>
+            <small style="color:var(--muted); font-size:11px;">Portal Layanan Posyandu &amp; Stunting</small>
         </div>
-    </div>
+    </header>
 
-    <!-- Pilihan 2 Tab Login -->
-    <div class="login-tabs">
-        <button type="button" class="tab-btn <?= $active_tab === 'warga' ? 'active' : '' ?>" id="tab_btn_warga" onclick="switchLoginTab('warga')">
+    <!-- Pilihan Akses 2-in-1: Tab Warga vs Petugas -->
+    <div class="login-tabs" role="tablist" aria-label="Metode Masuk">
+        <button type="button" class="tab-btn <?= $active_tab === 'warga' ? 'active' : '' ?>" id="tab_btn_warga" role="tab" aria-selected="<?= $active_tab === 'warga' ? 'true' : 'false' ?>" aria-controls="form_warga" onclick="switchLoginTab('warga')">
             <?= ui_icon('child', '', 14) ?> Warga / Orang Tua
         </button>
-        <button type="button" class="tab-btn <?= $active_tab === 'petugas' ? 'active' : '' ?>" id="tab_btn_petugas" onclick="switchLoginTab('petugas')">
-            <?= ui_icon('shield', '', 14) ?> Petugas & Kader
+        <button type="button" class="tab-btn <?= $active_tab === 'petugas' ? 'active' : '' ?>" id="tab_btn_petugas" role="tab" aria-selected="<?= $active_tab === 'petugas' ? 'true' : 'false' ?>" aria-controls="form_petugas" onclick="switchLoginTab('petugas')">
+            <?= ui_icon('shield', '', 14) ?> Petugas &amp; Kader
         </button>
     </div>
 
     <?php if ($error): ?>
-        <div class="alert alert-danger" style="margin-bottom:18px;">
+        <div class="alert alert-danger" style="margin-bottom:18px;" role="alert">
             <?= ui_icon('alert-circle', '', 16) ?> <?= htmlspecialchars($error) ?>
         </div>
     <?php endif; ?>
 
-    <!-- Form 1: Khusus Warga / Orang Tua (Cukup Nama Anak) -->
-    <div id="form_warga" style="<?= $active_tab === 'petugas' ? 'display:none;' : '' ?>">
-        <h1 style="font:700 18px 'Plus Jakarta Sans'; margin:0 0 6px;">Cek Tumbuh Kembang Balita</h1>
-        <p class="muted" style="margin-bottom:18px; line-height:1.5;">Masukkan nama balita Anda untuk melihat hasil penimbangan dan deteksi risiko stunting.</p>
+    <!-- Form 1: Khusus Warga / Orang Tua (Cukup Nama Balita) -->
+    <section id="form_warga" role="tabpanel" aria-labelledby="tab_btn_warga" style="<?= $active_tab === 'petugas' ? 'display:none;' : '' ?>">
+        <h1 style="font-size:18px; font-weight:700; margin:0 0 6px;">Cek Tumbuh Kembang Balita</h1>
+        <p class="muted" style="margin-bottom:18px; line-height:1.5;">Masukkan nama balita Anda untuk melihat hasil penimbangan dan pemantauan risiko stunting.</p>
 
         <form method="POST">
             <input type="hidden" name="login_type" value="warga">
             
             <div class="form-group" style="margin-bottom:18px;">
-                <label>Nama Lengkap atau Panggilan Balita</label>
-                <div class="input-group">
-                    <input type="text" name="nama_anak" class="form-control" required autofocus placeholder="Contoh: Muhammad Fathan / Kenzo" value="<?= htmlspecialchars($_POST['nama_anak'] ?? '') ?>">
-                </div>
-                <span class="form-hint">Bisa juga menggunakan 16 digit NIK balita jika ada</span>
+                <label for="nama_anak">Nama Lengkap atau Panggilan Balita</label>
+                <input type="text" id="nama_anak" name="nama_anak" class="form-control" required autofocus placeholder="Contoh: Muhammad Fathan / Kenzo" value="<?= htmlspecialchars($_POST['nama_anak'] ?? '') ?>">
+                <span class="form-hint">Dapat juga menggunakan 16 digit NIK balita jika ada</span>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width:100%; padding:11px;">
+            <button type="submit" class="btn btn-primary" style="width:100%; padding:10px;">
                 <?= ui_icon('search', '', 15) ?> Lihat Hasil Pemeriksaan Anak
             </button>
         </form>
         
-        <div style="background:var(--line-light); border-radius:8px; padding:10px 12px; margin-top:16px; font-size:11px; color:var(--muted); line-height:1.5;">
-            <strong>Catatan Warga:</strong> Data balita Anda dicatat secara berkala pada hari buka Posyandu. Hubungi kader posyandu jika nama ananda belum terdaftar.
+        <div style="margin-top:14px; font-size:12px; color:var(--muted); text-align:center;">
+            Nama balita belum terdaftar? Hubungi kader saat hari Posyandu.
         </div>
-    </div>
+    </section>
 
     <!-- Form 2: Petugas Posyandu / Admin -->
-    <div id="form_petugas" style="<?= $active_tab === 'warga' ? 'display:none;' : '' ?>">
-        <h1 style="font:700 18px 'Plus Jakarta Sans'; margin:0 0 6px;">Masuk Sebagai Petugas</h1>
-        <p class="muted" style="margin-bottom:18px;">Khusus kader posyandu, bidan, atau administrator sistem.</p>
+    <section id="form_petugas" role="tabpanel" aria-labelledby="tab_btn_petugas" style="<?= $active_tab === 'warga' ? 'display:none;' : '' ?>">
+        <h1 style="font-size:18px; font-weight:700; margin:0 0 6px;">Masuk Sebagai Petugas</h1>
+        <p class="muted" style="margin-bottom:18px;">Khusus kader posyandu, bidan desa, atau administrator sistem.</p>
 
         <form method="POST">
             <input type="hidden" name="login_type" value="petugas">
 
             <div class="form-group" style="margin-bottom:14px;">
-                <label>Username</label>
-                <input type="text" name="username" class="form-control" placeholder="Username kader / admin">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Username kader / admin">
             </div>
 
             <div class="form-group" style="margin-bottom:20px;">
-                <label>Password</label>
-                <input type="password" name="password" class="form-control" placeholder="Password akun">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password akun">
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width:100%; padding:11px;">
+            <button type="submit" class="btn btn-primary" style="width:100%; padding:10px;">
                 <?= ui_icon('shield', '', 15) ?> Masuk ke Dashboard Posyandu
             </button>
         </form>
-    </div>
+    </section>
 
-    <div style="border-top:1px solid var(--line-light); padding-top:16px; margin-top:24px; font-size:11px; color:var(--muted); text-align:center;">
-        Standar Antropometri Anak Kemenkes RI (Permenkes No. 2/2020)
-    </div>
+    <footer class="app-footer" style="padding-top:16px; margin-top:24px; font-size:11px; color:var(--muted); text-align:center; display:block;">
+        SiTumbuh &bull; Posyandu Digital
+    </footer>
 </main>
 
 <script>
@@ -193,12 +193,16 @@ function switchLoginTab(type) {
         fWarga.style.display = 'block';
         fPetugas.style.display = 'none';
         bWarga.classList.add('active');
+        bWarga.setAttribute('aria-selected', 'true');
         bPetugas.classList.remove('active');
+        bPetugas.setAttribute('aria-selected', 'false');
     } else {
         fWarga.style.display = 'none';
         fPetugas.style.display = 'block';
         bWarga.classList.remove('active');
+        bWarga.setAttribute('aria-selected', 'false');
         bPetugas.classList.add('active');
+        bPetugas.setAttribute('aria-selected', 'true');
     }
 }
 </script>

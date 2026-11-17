@@ -1,4 +1,4 @@
-# SiTumbuh - Sistem Informasi Posyandu & Deteksi Dini Stunting
+ SiTumbuh - Sistem Informasi Posyandu & Deteksi Dini Stunting
 
 Sistem informasi pemantauan tumbuh kembang dan deteksi dini risiko stunting pada balita (0-60 bulan) berdasarkan Standar Antropometri Anak Kemenkes RI (Permenkes No. 2 Tahun 2020 / WHO Child Growth Standards).
 

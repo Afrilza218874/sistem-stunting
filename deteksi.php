@@ -60,12 +60,12 @@ include __DIR__ . "/includes/sidebar.php";
     <div class="toolbar">
         <div>
             <h2>Kalkulator Deteksi Stunting</h2>
-            <p class="muted">Skrining status pertumbuhan balita secara mandiri berdasarkan Standar Antropometri Kemenkes RI (Permenkes No. 2 Tahun 2020 / WHO).</p>
+            <p class="muted">Hitung cepat nilai Z-Score dan status pertumbuhan balita.</p>
         </div>
     </div>
 
     <?php if ($error): ?>
-        <div class="alert alert-danger" style="margin-bottom:16px;">
+        <div class="alert alert-danger" style="margin-bottom:16px;" role="alert">
             <?= ui_icon('alert-circle', '', 16) ?> <?= htmlspecialchars($error) ?>
         </div>
     <?php endif; ?>
@@ -76,15 +76,15 @@ include __DIR__ . "/includes/sidebar.php";
             <form method="POST">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Jenis Kelamin Balita</label>
-                        <select name="jk" class="form-control" required>
+                        <label for="calc_jk">Jenis Kelamin Balita</label>
+                        <select name="jk" id="calc_jk" class="form-control" required>
                             <option value="L" <?= $jk === 'L' ? 'selected' : '' ?>>Laki-laki (L)</option>
                             <option value="P" <?= $jk === 'P' ? 'selected' : '' ?>>Perempuan (P)</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label>Metode Penentuan Umur</label>
+                        <label for="mode_umur">Metode Penentuan Umur</label>
                         <select name="mode_umur" id="mode_umur" class="form-control" onchange="toggleModeUmur(this.value)">
                             <option value="tgl" <?= $mode_umur === 'tgl' ? 'selected' : '' ?>>Hitung dari Tanggal Lahir</option>
                             <option value="manual" <?= $mode_umur === 'manual' ? 'selected' : '' ?>>Input Umur Bulan Langsung</option>
@@ -92,145 +92,154 @@ include __DIR__ . "/includes/sidebar.php";
                     </div>
 
                     <div class="form-group" id="grp_tgl_lahir" style="<?= $mode_umur === 'manual' ? 'display:none;' : '' ?>">
-                        <label>Tanggal Lahir</label>
-                        <input type="date" name="tgl_lahir" class="form-control" value="<?= htmlspecialchars($tgl_lahir) ?>" max="<?= date('Y-m-d') ?>">
+                        <label for="calc_tgl_lahir">Tanggal Lahir</label>
+                        <input type="date" name="tgl_lahir" id="calc_tgl_lahir" class="form-control" value="<?= htmlspecialchars($tgl_lahir) ?>" max="<?= date('Y-m-d') ?>">
                     </div>
 
                     <div class="form-group" id="grp_tgl_ukur" style="<?= $mode_umur === 'manual' ? 'display:none;' : '' ?>">
-                        <label>Tanggal Pengukuran</label>
-                        <input type="date" name="tgl_ukur" class="form-control" value="<?= htmlspecialchars($tgl_ukur) ?>" max="<?= date('Y-m-d') ?>">
+                        <label for="calc_tgl_ukur">Tanggal Pengukuran</label>
+                        <input type="date" name="tgl_ukur" id="calc_tgl_ukur" class="form-control" value="<?= htmlspecialchars($tgl_ukur) ?>" max="<?= date('Y-m-d') ?>">
                     </div>
 
                     <div class="form-group span-2" id="grp_umur_manual" style="<?= $mode_umur === 'tgl' ? 'display:none;' : '' ?>">
-                        <label>Usia Balita (Bulan: 0 - 60)</label>
-                        <input type="number" name="umur_manual" min="0" max="60" class="form-control" value="<?= $umur_manual ?>">
+                        <label for="calc_umur_manual">Usia Balita (Bulan: 0 - 60)</label>
+                        <input type="number" name="umur_manual" id="calc_umur_manual" min="0" max="60" class="form-control" value="<?= $umur_manual ?>">
                     </div>
 
                     <div class="form-group">
-                        <label>Panjang / Tinggi Badan</label>
+                        <label for="calc_tinggi">Panjang / Tinggi Badan</label>
                         <div class="input-group">
-                            <input type="number" step="0.1" name="tinggi_cm" class="form-control" placeholder="Contoh: 75.5" required value="<?= $tinggi_cm ?>">
+                            <input type="number" step="0.1" name="tinggi_cm" id="calc_tinggi" class="form-control" placeholder="Contoh: 75.5" required value="<?= $tinggi_cm ?>">
                             <span class="input-suffix">cm</span>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Berat Badan</label>
+                        <label for="calc_berat">Berat Badan</label>
                         <div class="input-group">
-                            <input type="number" step="0.05" name="berat_kg" class="form-control" placeholder="Contoh: 9.20" required value="<?= $berat_kg ?>">
+                            <input type="number" step="0.05" name="berat_kg" id="calc_berat" class="form-control" placeholder="Contoh: 9.20" required value="<?= $berat_kg ?>">
                             <span class="input-suffix">kg</span>
                         </div>
                     </div>
 
                     <div class="form-group span-2">
-                        <label>Posisi Cara Pengukuran</label>
-                        <select name="jenis_ukur" class="form-control">
-                            <option value="PB" <?= $jenis_ukur === 'PB' ? 'selected' : '' ?>>PB - Telentang (Panjang Badan, untuk balita < 24 bulan)</option>
-                            <option value="TB" <?= $jenis_ukur === 'TB' ? 'selected' : '' ?>>TB - Berdiri (Tinggi Badan, untuk balita ≥ 24 bulan)</option>
+                        <label for="calc_posisi">Posisi Cara Pengukuran</label>
+                        <select name="jenis_ukur" id="calc_posisi" class="form-control">
+                            <option value="PB" <?= $jenis_ukur === 'PB' ? 'selected' : '' ?>>PB - Telentang (Panjang Badan, untuk balita &lt; 24 bulan)</option>
+                            <option value="TB" <?= $jenis_ukur === 'TB' ? 'selected' : '' ?>>TB - Berdiri (Tinggi Badan, untuk balita &ge; 24 bulan)</option>
                         </select>
                     </div>
                 </div>
 
                 <div style="margin-top:20px;">
-                    <button type="submit" class="btn btn-primary" style="width:100%; padding:11px;">
-                        <?= ui_icon('calculator', '', 15) ?> Hitung Z-Score & Deteksi Stunting
+                    <button type="submit" class="btn btn-primary" style="width:100%; padding:10px;">
+                        <?= ui_icon('calculator', '', 14) ?> Hitung Nilai Z-Score &amp; Status
                     </button>
                 </div>
             </form>
         </div>
 
-        <!-- Panel Hasil Deteksi -->
+        <!-- Kolom Hasil / Panduan Ambang Batas -->
         <div>
-            <?php if ($hasil): ?>
-                <article class="panel" style="border-top: 4px solid <?= $hasil['tbu']['status'] === 'Sangat Pendek' ? 'var(--danger)' : ($hasil['tbu']['status'] === 'Pendek' ? 'var(--warning)' : 'var(--success)') ?>;">
+            <?php if ($hasil): 
+                $tbu = $hasil['tbu'];
+                $bbu = $hasil['bbu'];
+
+                $badge_tbu = 'badge-secondary';
+                if ($tbu['status'] === 'Sangat Pendek') $badge_tbu = 'badge-danger';
+                elseif ($tbu['status'] === 'Pendek') $badge_tbu = 'badge-warning';
+                elseif ($tbu['status'] === 'Normal') $badge_tbu = 'badge-success';
+                elseif ($tbu['status'] === 'Tinggi') $badge_tbu = 'badge-info';
+
+                $badge_bbu = 'badge-secondary';
+                if ($bbu['status'] === 'Sangat Kurang') $badge_bbu = 'badge-danger';
+                elseif ($bbu['status'] === 'Kurang') $badge_bbu = 'badge-warning';
+                elseif ($bbu['status'] === 'Normal') $badge_bbu = 'badge-success';
+                elseif ($bbu['status'] === 'Risiko Lebih') $badge_bbu = 'badge-warning';
+            ?>
+                <article class="panel" style="border-left: 4px solid <?= $tbu['status'] === 'Sangat Pendek' ? 'var(--danger)' : ($tbu['status'] === 'Pendek' ? 'var(--warning)' : 'var(--success)') ?>;">
                     <div class="panel-heading">
                         <div>
-                            <h3>Hasil Analisis Pertumbuhan</h3>
-                            <p>Balita <?= $hasil['jk'] === 'L' ? 'Laki-laki' : 'Perempuan' ?> · Usia <?= $hasil['umur_bulan'] ?> Bulan</p>
+                            <h3>Hasil Skrining Antropometri</h3>
+                            <p>Balita Usia: <strong><?= $hasil['umur_bulan'] ?> Bulan</strong> (<?= $hasil['jk'] === 'L' ? 'Laki-laki' : 'Perempuan' ?>)</p>
                         </div>
                     </div>
 
-                    <!-- Indikator 1: TB/U (Stunting) -->
-                    <div class="zscore-meter-card" style="margin-bottom:14px;">
-                        <small style="color:var(--muted); font-weight:700; text-transform:uppercase; font-size:10px;">1. Indikator Stunting (TB/U)</small>
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin:8px 0;">
-                            <div>
-                                <strong style="font-size:18px; color:var(--ink);"><?= htmlspecialchars($hasil['tbu']['status']) ?></strong>
-                                <div style="font-size:12px; color:var(--muted);"><?= htmlspecialchars($hasil['tbu']['deskripsi']) ?></div>
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+                        <!-- Status TB/U (Stunting) -->
+                        <div class="zscore-meter-card">
+                            <small style="color:var(--muted); font-weight:700; text-transform:uppercase; font-size:10px;">Indikator Tinggi Badan (TB/U)</small>
+                            <div style="display:flex; align-items:baseline; justify-content:space-between; margin:8px 0;">
+                                <strong style="font-size:17px; color:var(--ink);"><?= htmlspecialchars($tbu['status']) ?></strong>
+                                <span class="badge <?= $badge_tbu ?>">Z: <?= $tbu['zscore'] ?> SD</span>
                             </div>
-                            <span class="badge <?= $hasil['tbu']['badge'] ?>" style="font-size:12px; padding:5px 10px;">Z: <?= $hasil['tbu']['zscore'] ?> SD</span>
-                        </div>
 
-                        <div class="zscore-meter-bar">
-                            <div class="zscore-bar-severe" title="Sangat Pendek (Z < -3)"></div>
-                            <div class="zscore-bar-stunted" title="Pendek (-3 s/d -2)"></div>
-                            <div class="zscore-bar-normal" title="Normal (-2 s/d +3)"></div>
-                            <div class="zscore-bar-tall" title="Tinggi (> +3)"></div>
-                        </div>
-                        <div class="zscore-scale-legend">
-                            <span>-3 SD (Sangat Pendek)</span>
-                            <span>-2 SD (Pendek)</span>
-                            <span>Normal</span>
-                            <span>+3 SD (Tinggi)</span>
-                        </div>
-
-                        <div style="font-size:11px; color:var(--muted); border-top:1px solid var(--line-light); padding-top:8px; margin-top:10px;">
-                            Median Baku WHO: <strong><?= $hasil['tbu']['median'] ?> cm</strong> · Hasil Ukur: <strong><?= $hasil['tinggi_cm'] ?> cm</strong>
-                        </div>
-                    </div>
-
-                    <!-- Indikator 2: BB/U -->
-                    <div class="zscore-meter-card">
-                        <small style="color:var(--muted); font-weight:700; text-transform:uppercase; font-size:10px;">2. Indikator Berat Badan (BB/U)</small>
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin:8px 0;">
-                            <div>
-                                <strong style="font-size:18px; color:var(--ink);"><?= htmlspecialchars($hasil['bbu']['status']) ?></strong>
-                                <div style="font-size:12px; color:var(--muted);"><?= htmlspecialchars($hasil['bbu']['deskripsi']) ?></div>
+                            <div class="zscore-meter-bar">
+                                <div class="zscore-bar-severe" title="Sangat Pendek"></div>
+                                <div class="zscore-bar-stunted" title="Pendek"></div>
+                                <div class="zscore-bar-normal" title="Normal"></div>
+                                <div class="zscore-bar-tall" title="Tinggi"></div>
                             </div>
-                            <span class="badge <?= $hasil['bbu']['badge'] ?>" style="font-size:12px; padding:5px 10px;">Z: <?= $hasil['bbu']['zscore'] ?> SD</span>
+                            <div class="zscore-scale-legend">
+                                <span>-3 SD</span>
+                                <span>-2 SD</span>
+                                <span>Median</span>
+                                <span>+3 SD</span>
+                            </div>
+
+                            <p style="font-size:11px; margin:8px 0 0; color:var(--ink-secondary); line-height:1.5;">
+                                <?php if ($tbu['status'] === 'Sangat Pendek'): ?>
+                                    <strong>Terindikasi Stunting Berat:</strong> Nilai Z-Score berada di bawah -3.0 SD. Memerlukan intervensi medis dan gizi intensif di Puskesmas.
+                                <?php elseif ($tbu['status'] === 'Pendek'): ?>
+                                    <strong>Terindikasi Stunting:</strong> Nilai Z-Score berada di antara -3.0 s/d -2.0 SD. Diperlukan penambahan porsi protein hewani dan pemantauan berkala.
+                                <?php elseif ($tbu['status'] === 'Normal'): ?>
+                                    <strong>Tinggi Badan Normal:</strong> Pertumbuhan linier berada pada rentang ideal rata-rata anak sehat.
+                                <?php else: ?>
+                                    <strong>Tinggi:</strong> Nilai z-score di atas +3.0 SD. Pertumbuhan tinggi sangat baik.
+                                <?php endif; ?>
+                            </p>
                         </div>
 
-                        <div style="font-size:11px; color:var(--muted); border-top:1px solid var(--line-light); padding-top:8px; margin-top:10px;">
-                            Median Baku WHO: <strong><?= $hasil['bbu']['median'] ?> kg</strong> · Hasil Ukur: <strong><?= $hasil['berat_kg'] ?> kg</strong>
+                        <!-- Status BB/U -->
+                        <div class="zscore-meter-card">
+                            <small style="color:var(--muted); font-weight:700; text-transform:uppercase; font-size:10px;">Indikator Berat Badan (BB/U)</small>
+                            <div style="display:flex; align-items:baseline; justify-content:space-between; margin:8px 0;">
+                                <strong style="font-size:17px; color:var(--ink);"><?= htmlspecialchars($bbu['status']) ?></strong>
+                                <span class="badge <?= $badge_bbu ?>">Z: <?= $bbu['zscore'] ?> SD</span>
+                            </div>
+                            <p style="font-size:11px; margin:4px 0 0; color:var(--muted);">
+                                Standar Median BB untuk usia <?= $hasil['umur_bulan'] ?> bulan: ~<?= $bbu['median'] ?> kg
+                            </p>
                         </div>
-                    </div>
-
-                    <!-- Rekomendasi Gizi -->
-                    <div style="background:var(--primary-light); border:1px solid #cce8d5; border-radius:8px; padding:12px 14px; margin-top:14px;">
-                        <strong style="color:var(--primary-dark); font-size:12px; display:flex; align-items:center; gap:6px;">
-                            <?= ui_icon('info', '', 14) ?> Panduan Tindak Lanjut:
-                        </strong>
-                        <p style="font-size:12px; color:var(--ink-secondary); margin:4px 0 0; line-height:1.6;">
-                            <?= htmlspecialchars($hasil['tbu']['rekomendasi']) ?>
-                        </p>
                     </div>
                 </article>
             <?php else: ?>
+                <!-- Panduan Kategori Klasifikasi WHO -->
                 <article class="panel">
                     <div class="panel-heading">
                         <div>
-                            <h3>Standar Klasifikasi Stunting</h3>
-                            <p>Ambang Batas (Z-Score) Indeks TB/U Kemenkes RI</p>
+                            <h3>Klasifikasi Standar WHO</h3>
+                            <p>Ambang batas Z-Score Tinggi Menurut Umur (TB/U):</p>
                         </div>
                     </div>
-                    
-                    <div style="display:flex; flex-direction:column; gap:10px; margin-top:6px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:6px; background:var(--danger-bg); border:1px solid var(--danger-border);">
+
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-control); background:var(--danger-bg); border:1px solid var(--danger-border);">
                             <span style="font-size:12px; font-weight:600; color:var(--danger);">Sangat Pendek (Severely Stunted)</span>
                             <code style="font-size:11px; color:var(--danger);">Z &lt; -3.0 SD</code>
                         </div>
 
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:6px; background:var(--warning-bg); border:1px solid var(--warning-border);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-control); background:var(--warning-bg); border:1px solid var(--warning-border);">
                             <span style="font-size:12px; font-weight:600; color:var(--warning);">Pendek (Stunted)</span>
-                            <code style="font-size:11px; color:var(--warning);">-3.0 SD ≤ Z &lt; -2.0 SD</code>
+                            <code style="font-size:11px; color:var(--warning);">-3.0 SD &le; Z &lt; -2.0 SD</code>
                         </div>
 
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:6px; background:var(--success-bg); border:1px solid var(--success-border);">
-                            <span style="font-size:12px; font-weight:600; color:var(--success);">Normal (Proporsional)</span>
-                            <code style="font-size:11px; color:var(--success);">-2.0 SD ≤ Z ≤ +3.0 SD</code>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-control); background:var(--success-bg); border:1px solid var(--success-border);">
+                            <span style="font-size:12px; font-weight:600; color:var(--success);">Normal</span>
+                            <code style="font-size:11px; color:var(--success);">-2.0 SD &le; Z &le; +3.0 SD</code>
                         </div>
 
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:6px; background:var(--info-bg); border:1px solid var(--info-border);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-control); background:var(--info-bg); border:1px solid var(--info-border);">
                             <span style="font-size:12px; font-weight:600; color:var(--info);">Tinggi</span>
                             <code style="font-size:11px; color:var(--info);">Z &gt; +3.0 SD</code>
                         </div>
@@ -243,7 +252,6 @@ include __DIR__ . "/includes/sidebar.php";
             <?php endif; ?>
         </div>
     </div>
-</main>
 
 <script>
 function toggleModeUmur(val) {

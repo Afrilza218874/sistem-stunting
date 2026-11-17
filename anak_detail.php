@@ -210,10 +210,6 @@ include __DIR__ . "/includes/sidebar.php";
                     Pertumbuhan anak berada di jalur sehat dan optimal. Lanjutkan pola makan bergizi seimbang, jaga jadwal imunisasi lengkap, dan lakukan penimbangan rutin tiap bulan di Posyandu.
                 <?php endif; ?>
             </p>
-
-            <div style="border-top:1px solid var(--line-light); padding-top:12px; margin-top:16px; font-size:11px; color:var(--muted); line-height:1.6;">
-                Standar Antropometri Kemenkes RI (Permenkes No. 2/2020) & WHO Child Growth Standards.
-            </div>
         </article>
     </div>
     <?php endif; ?>
@@ -300,6 +296,5 @@ include __DIR__ . "/includes/sidebar.php";
             </tbody>
         </table>
     </div>
-</main>
 
 <?php include __DIR__ . "/includes/footer.php"; ?>

@@ -1,38 +1,41 @@
 <?php
 require_once __DIR__ . "/includes/auth.php";
-require_role(['admin', 'petugas']);
+require_login();
+require_admin_or_petugas();
 require_once __DIR__ . "/config/database.php";
 require_once __DIR__ . "/includes/antropometri.php";
 
-$page_title = "Input Pemeriksaan Antropometri";
+$page_title = "Input Pemeriksaan Posyandu";
 $user = current_user();
-$error = "";
-$anak_id_preselect = (int)($_GET['anak_id'] ?? 0);
 
-// Ambil daftar anak untuk dropdown
+$error = "";
+$success = "";
+
+// Daftar balita untuk dropdown
 $anak_list = $conn->query("SELECT id, nama, nik, jenis_kelamin, tanggal_lahir, nama_ibu FROM anak ORDER BY nama ASC");
+
+$anak_id_preselect = (int)($_GET['anak_id'] ?? 0);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $anak_id = (int)($_POST['anak_id'] ?? 0);
-    $tanggal_periksa = trim($_POST['tanggal_periksa'] ?? '');
-    $berat_kg = (float)str_replace(',', '.', trim($_POST['berat_kg'] ?? '0'));
-    $tinggi_cm = (float)str_replace(',', '.', trim($_POST['tinggi_cm'] ?? '0'));
+    $tanggal_periksa = trim($_POST['tanggal_periksa'] ?? date('Y-m-d'));
+    $tinggi_cm = (float)str_replace(',', '.', $_POST['tinggi_cm'] ?? 0);
+    $berat_kg = (float)str_replace(',', '.', $_POST['berat_kg'] ?? 0);
     $jenis_pengukuran = trim($_POST['jenis_pengukuran'] ?? 'TB');
     $catatan = trim($_POST['catatan'] ?? '');
+    $petugas_id = (int)$user['id'];
 
     if ($anak_id <= 0) {
-        $error = "Pilih balita yang diperiksa.";
-    } elseif ($tanggal_periksa === '') {
-        $error = "Tanggal pemeriksaan wajib diisi.";
-    } elseif ($berat_kg <= 1.0 || $berat_kg > 40.0) {
-        $error = "Berat badan berada di luar batas wajar balita (1 - 40 kg).";
-    } elseif ($tinggi_cm <= 35.0 || $tinggi_cm > 140.0) {
-        $error = "Tinggi/panjang badan berada di luar batas wajar balita (35 - 140 cm).";
-    } elseif (!in_array($jenis_pengukuran, ['PB', 'TB'], true)) {
-        $error = "Pilih posisi cara pengukuran (PB / TB).";
+        $error = "Silakan pilih balita yang diperiksa.";
+    } elseif ($tanggal_periksa === '' || $tanggal_periksa > date('Y-m-d')) {
+        $error = "Tanggal pemeriksaan tidak valid atau melebihi hari ini.";
+    } elseif ($tinggi_cm < 35 || $tinggi_cm > 140) {
+        $error = "Tinggi/panjang badan harus berada di rentang valid (35 - 140 cm).";
+    } elseif ($berat_kg < 1 || $berat_kg > 40) {
+        $error = "Berat badan harus berada di rentang valid (1 - 40 kg).";
     } else {
-        // Ambil data anak
-        $stmt_a = $conn->prepare("SELECT id, nama, jenis_kelamin, tanggal_lahir FROM anak WHERE id = ? LIMIT 1");
+        // Ambil data tanggal lahir & jenis kelamin balita
+        $stmt_a = $conn->prepare("SELECT tanggal_lahir, jenis_kelamin FROM anak WHERE id = ?");
         $stmt_a->bind_param("i", $anak_id);
         $stmt_a->execute();
         $anak = $stmt_a->get_result()->fetch_assoc();
@@ -40,28 +43,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$anak) {
             $error = "Data balita tidak ditemukan.";
         } else {
-            // Hitung umur balita saat tanggal periksa
+            // Hitung umur balita dalam bulan
             $umur_bulan = hitung_umur_bulan($anak['tanggal_lahir'], $tanggal_periksa);
 
-            // Hitung Z-Score TB/U (Stunting)
-            $hasil_tbu = hitung_zscore_tbu($umur_bulan, $tinggi_cm, $anak['jenis_kelamin'], $jenis_pengukuran);
-            $zscore_tbu = $hasil_tbu['zscore'];
-            $status_tbu = $hasil_tbu['status'];
+            // Hitung Z-Score dan status gizi
+            $res_tbu = hitung_zscore_tbu($umur_bulan, $tinggi_cm, $anak['jenis_kelamin'], $jenis_pengukuran);
+            $res_bbu = hitung_zscore_bbu($umur_bulan, $berat_kg, $anak['jenis_kelamin']);
 
-            // Hitung Z-Score BB/U (Underweight)
-            $hasil_bbu = hitung_zscore_bbu($umur_bulan, $berat_kg, $anak['jenis_kelamin']);
-            $zscore_bbu = $hasil_bbu['zscore'];
-            $status_bbu = $hasil_bbu['status'];
-
-            $petugas_id = $user['id'] ?? null;
-            $catatanVal = $catatan !== '' ? $catatan : null;
+            $zscore_tbu = $res_tbu['zscore'];
+            $status_tbu = $res_tbu['status'];
+            $zscore_bbu = $res_bbu['zscore'];
+            $status_bbu = $res_bbu['status'];
 
             $stmt_ins = $conn->prepare(
-                "INSERT INTO pemeriksaan (anak_id, tanggal_periksa, berat_kg, tinggi_cm, jenis_pengukuran, umur_bulan, zscore_tbu, status_tbu, zscore_bbu, status_bbu, catatan, petugas_id)
+                "INSERT INTO pemeriksaan 
+                 (anak_id, tanggal_periksa, berat_kg, tinggi_cm, jenis_pengukuran, umur_bulan, zscore_tbu, status_tbu, zscore_bbu, status_bbu, catatan, petugas_id) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
+
+            $catatanVal = $catatan !== '' ? $catatan : null;
+
             $stmt_ins->bind_param(
-                "isddsidsssii",
+                "isddsidssdss",
                 $anak_id,
                 $tanggal_periksa,
                 $berat_kg,
@@ -106,7 +109,7 @@ include __DIR__ . "/includes/sidebar.php";
     </div>
 
     <?php if ($error): ?>
-        <div class="alert alert-danger" style="margin-bottom:16px;">
+        <div class="alert alert-danger" style="margin-bottom:16px;" role="alert">
             <?= ui_icon('alert-circle', '', 16) ?> <?= htmlspecialchars($error) ?>
         </div>
     <?php endif; ?>
@@ -115,7 +118,7 @@ include __DIR__ . "/includes/sidebar.php";
         <form method="POST">
             <div class="form-grid">
                 <div class="form-group span-2">
-                    <label>Pilih Balita <span style="color:var(--danger);">*</span></label>
+                    <label for="anak_select">Pilih Balita <span style="color:var(--danger);">*</span></label>
                     <select name="anak_id" id="anak_select" class="form-control" required onchange="updateChildGuidance()">
                         <option value="">-- Pilih Balita Sasaran --</option>
                         <?php while ($a = $anak_list->fetch_assoc()): 
@@ -130,57 +133,56 @@ include __DIR__ . "/includes/sidebar.php";
 
                 <!-- Live Info Box -->
                 <div class="form-group span-2" id="child_guidance_box" style="display:none;">
-                    <div style="background:var(--primary-light); border:1px solid #cce8d5; border-radius:8px; padding:10px 14px; font-size:12px; color:var(--primary-dark);">
+                    <div style="background:var(--primary-light); border:1px solid var(--primary-border); border-radius:var(--radius-control); padding:10px 14px; font-size:12px; color:var(--primary-dark);">
                         <strong id="guidance_name">Balita</strong> · Usia saat ukur: <strong id="guidance_age">0 bulan</strong> · Rekomendasi cara ukur: <strong id="guidance_pos">TB (Berdiri)</strong>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Tanggal Pemeriksaan <span style="color:var(--danger);">*</span></label>
+                    <label for="tanggal_periksa">Tanggal Pemeriksaan <span style="color:var(--danger);">*</span></label>
                     <input type="date" name="tanggal_periksa" id="tanggal_periksa" class="form-control" required value="<?= htmlspecialchars($_POST['tanggal_periksa'] ?? date('Y-m-d')) ?>" max="<?= date('Y-m-d') ?>" onchange="updateChildGuidance()">
                 </div>
 
                 <div class="form-group">
-                    <label>Posisi Cara Ukur Panjang/Tinggi <span style="color:var(--danger);">*</span></label>
+                    <label for="jenis_pengukuran">Posisi Cara Ukur Panjang/Tinggi <span style="color:var(--danger);">*</span></label>
                     <select name="jenis_pengukuran" id="jenis_pengukuran" class="form-control" required>
                         <option value="TB" <?= ($_POST['jenis_pengukuran'] ?? '') === 'TB' ? 'selected' : '' ?>>TB - Berdiri (Tinggi Badan, anak ≥24 bulan)</option>
-                        <option value="PB" <?= ($_POST['jenis_pengukuran'] ?? '') === 'PB' ? 'selected' : '' ?>>PB - Telentang (Panjang Badan, anak <24 bulan)</option>
+                        <option value="PB" <?= ($_POST['jenis_pengukuran'] ?? '') === 'PB' ? 'selected' : '' ?>>PB - Telentang (Panjang Badan, anak &lt;24 bulan)</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>Tinggi / Panjang Badan <span style="color:var(--danger);">*</span></label>
+                    <label for="tinggi_cm">Tinggi / Panjang Badan <span style="color:var(--danger);">*</span></label>
                     <div class="input-group">
-                        <input type="number" step="0.1" name="tinggi_cm" class="form-control" placeholder="Contoh: 76.5" required value="<?= htmlspecialchars($_POST['tinggi_cm'] ?? '') ?>">
+                        <input type="number" step="0.1" id="tinggi_cm" name="tinggi_cm" class="form-control" placeholder="Contoh: 76.5" required value="<?= htmlspecialchars($_POST['tinggi_cm'] ?? '') ?>">
                         <span class="input-suffix">cm</span>
                     </div>
                     <span class="form-hint">Gunakan alat ukur stadiometer / infantometer</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Berat Badan <span style="color:var(--danger);">*</span></label>
+                    <label for="berat_kg">Berat Badan <span style="color:var(--danger);">*</span></label>
                     <div class="input-group">
-                        <input type="number" step="0.05" name="berat_kg" class="form-control" placeholder="Contoh: 9.80" required value="<?= htmlspecialchars($_POST['berat_kg'] ?? '') ?>">
+                        <input type="number" step="0.05" id="berat_kg" name="berat_kg" class="form-control" placeholder="Contoh: 9.80" required value="<?= htmlspecialchars($_POST['berat_kg'] ?? '') ?>">
                         <span class="input-suffix">kg</span>
                     </div>
                     <span class="form-hint">Gunakan timbangan digital yang terkalibrasi</span>
                 </div>
 
                 <div class="form-group span-2">
-                    <label>Catatan Kader / Keluhan Kesehatan</label>
-                    <textarea name="catatan" class="form-control" rows="2" placeholder="Catatan tambahan: nafsu makan, status imunisasi, atau riwayat sakit"><?= htmlspecialchars($_POST['catatan'] ?? '') ?></textarea>
+                    <label for="catatan">Catatan Kader / Keluhan Kesehatan</label>
+                    <textarea id="catatan" name="catatan" class="form-control" rows="2" placeholder="Catatan tambahan: nafsu makan, status imunisasi, atau riwayat sakit"><?= htmlspecialchars($_POST['catatan'] ?? '') ?></textarea>
                 </div>
             </div>
 
             <div style="margin-top:24px; display:flex; gap:10px;">
                 <button type="submit" class="btn btn-primary">
-                    <?= ui_icon('check', '', 14) ?> Simpan & Analisis Deteksi Stunting
+                    <?= ui_icon('check', '', 14) ?> Simpan &amp; Analisis Deteksi Stunting
                 </button>
                 <a href="pemeriksaan.php" class="btn btn-secondary">Batal</a>
             </div>
         </form>
     </div>
-</main>
 
 <script>
 function updateChildGuidance() {

@@ -57,10 +57,10 @@ function format_umur(string $tanggal_lahir, string $tanggal_periksa): string {
  * - Usia >24 bulan harusnya berdiri (TB). Jika telentang (PB), koreksi -0.7 cm.
  */
 function koreksi_tinggi_badan(float $tinggi_cm, int $umur_bulan, string $jenis_pengukuran): float {
-    if ($umur_bulan <= 24 && $jenis_pengukuran === 'TB') {
+    if ($umur_bulan < 24 && $jenis_pengukuran === 'TB') {
         return $tinggi_cm + 0.7;
     }
-    if ($umur_bulan > 24 && $jenis_pengukuran === 'PB') {
+    if ($umur_bulan >= 24 && $jenis_pengukuran === 'PB') {
         return max(0.0, $tinggi_cm - 0.7);
     }
     return $tinggi_cm;

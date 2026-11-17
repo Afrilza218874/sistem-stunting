@@ -80,8 +80,8 @@ include __DIR__ . "/includes/sidebar.php";
     <!-- Filter Bar -->
     <form method="GET" class="card-summary" style="padding:14px; margin-bottom:16px;">
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-            <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Cari nama balita, NIK, nama ibu, alamat..." class="form-control" style="flex:1; min-width:220px;">
-            <select name="jk" class="form-control" style="width:auto;">
+            <input type="text" name="q" aria-label="Cari nama balita, NIK, nama ibu, alamat" value="<?= htmlspecialchars($q) ?>" placeholder="Cari nama balita, NIK, nama ibu, alamat..." class="form-control" style="flex:1; min-width:220px;">
+            <select name="jk" aria-label="Filter berdasarkan jenis kelamin" class="form-control" style="width:auto;">
                 <option value="">Semua Jenis Kelamin</option>
                 <option value="L" <?= $filter_jk === 'L' ? 'selected' : '' ?>>Laki-laki (L)</option>
                 <option value="P" <?= $filter_jk === 'P' ? 'selected' : '' ?>>Perempuan (P)</option>
@@ -191,6 +191,5 @@ include __DIR__ . "/includes/sidebar.php";
             </tbody>
         </table>
     </div>
-</main>
 
 <?php include __DIR__ . "/includes/footer.php"; ?>

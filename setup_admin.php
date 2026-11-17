@@ -61,19 +61,19 @@ if ($total > 0) {
 <body class="login-page">
 
 <main class="login-card">
-    <div class="login-brand">
-        <span class="brand-mark" style="width:36px; height:36px;"><?= ui_icon('shield', '', 18) ?></span>
+    <header class="login-brand">
+        <span class="brand-mark" style="width:36px; height:36px;" aria-hidden="true"><?= ui_icon('shield', '', 18) ?></span>
         <div>
-            <strong style="font:700 16px 'Plus Jakarta Sans'; color:var(--ink); display:block;">SiTumbuh</strong>
+            <strong style="font-family:'Bricolage Grotesque', sans-serif; font-size:17px; font-weight:700; color:var(--ink); display:block;">SiTumbuh</strong>
             <small style="color:var(--muted); font-size:11px;">Deteksi Dini Risiko Stunting</small>
         </div>
-    </div>
+    </header>
 
-    <h1>Inisialisasi Administrator</h1>
+    <h1 style="font-size:20px; font-weight:700; margin:0 0 4px;">Inisialisasi Administrator</h1>
     <p class="muted" style="margin-bottom:20px;">Buat akun administrator utama untuk mengelola sistem.</p>
 
     <?php if ($message): ?>
-        <div class="alert <?= $is_error ? 'alert-danger' : 'alert-success' ?>" style="margin-bottom:18px;">
+        <div class="alert <?= $is_error ? 'alert-danger' : 'alert-success' ?>" style="margin-bottom:20px;" role="alert">
             <?= ui_icon($is_error ? 'alert-circle' : 'check-circle', '', 16) ?> <?= htmlspecialchars($message) ?>
         </div>
     <?php endif; ?>
@@ -81,31 +81,31 @@ if ($total > 0) {
     <?php if ($total === 0): ?>
     <form method="POST">
         <div class="form-group" style="margin-bottom:14px;">
-            <label>Nama Lengkap</label>
-            <input type="text" name="nama" class="form-control" required placeholder="Administrator SiTumbuh">
+            <label for="setup_nama">Nama Lengkap</label>
+            <input type="text" id="setup_nama" name="nama" class="form-control" required placeholder="Administrator SiTumbuh">
         </div>
 
         <div class="form-group" style="margin-bottom:14px;">
-            <label>Username</label>
-            <input type="text" name="username" class="form-control" required placeholder="admin">
+            <label for="setup_username">Username</label>
+            <input type="text" id="setup_username" name="username" class="form-control" required placeholder="admin">
         </div>
 
         <div class="form-group" style="margin-bottom:14px;">
-            <label>Email (Opsional)</label>
-            <input type="email" name="email" class="form-control" placeholder="admin@situmbuh.id">
+            <label for="setup_email">Email (Opsional)</label>
+            <input type="email" id="setup_email" name="email" class="form-control" placeholder="admin@situmbuh.id">
         </div>
 
         <div class="form-group" style="margin-bottom:20px;">
-            <label>Password (Minimal 8 Karakter)</label>
-            <input type="password" name="password" class="form-control" minlength="8" required placeholder="Password kuat">
+            <label for="setup_password">Password (Minimal 8 Karakter)</label>
+            <input type="password" id="setup_password" name="password" class="form-control" minlength="8" required placeholder="Password kuat">
         </div>
 
-        <button class="btn btn-primary" type="submit" style="width:100%; padding:11px;">
+        <button class="btn btn-primary" type="submit" style="width:100%; padding:10px;">
             Buat Akun Administrator
         </button>
     </form>
     <?php else: ?>
-        <a href="login.php" class="btn btn-primary" style="width:100%; padding:11px;">
+        <a href="login.php" class="btn btn-primary" style="width:100%; padding:10px;">
             Menuju Halaman Login
         </a>
     <?php endif; ?>

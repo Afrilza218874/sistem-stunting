@@ -83,15 +83,15 @@ include __DIR__ . "/includes/sidebar.php";
     <!-- Filter Form -->
     <form method="GET" class="card-summary" style="padding:14px; margin-bottom:16px;">
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-            <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Cari nama balita..." class="form-control" style="flex:1; min-width:200px;">
-            <select name="status_tbu" class="form-control" style="width:auto;">
+            <input type="text" name="q" aria-label="Cari nama balita" value="<?= htmlspecialchars($q) ?>" placeholder="Cari nama balita..." class="form-control" style="flex:1; min-width:200px;">
+            <select name="status_tbu" aria-label="Filter status stunting TB/U" class="form-control" style="width:auto;">
                 <option value="">Semua Status TB/U</option>
                 <option value="Sangat Pendek" <?= $filter_status === 'Sangat Pendek' ? 'selected' : '' ?>>Sangat Pendek (Severely Stunted)</option>
                 <option value="Pendek" <?= $filter_status === 'Pendek' ? 'selected' : '' ?>>Pendek (Stunted)</option>
                 <option value="Normal" <?= $filter_status === 'Normal' ? 'selected' : '' ?>>Normal</option>
                 <option value="Tinggi" <?= $filter_status === 'Tinggi' ? 'selected' : '' ?>>Tinggi</option>
             </select>
-            <input type="month" name="bulan" value="<?= htmlspecialchars($filter_bulan) ?>" class="form-control" style="width:auto;" title="Filter Bulan Posyandu">
+            <input type="month" name="bulan" aria-label="Filter Bulan Posyandu" value="<?= htmlspecialchars($filter_bulan) ?>" class="form-control" style="width:auto;" title="Filter Bulan Posyandu">
             <button type="submit" class="btn btn-secondary">
                 <?= ui_icon('search', '', 14) ?> Terapkan
             </button>
@@ -188,6 +188,5 @@ include __DIR__ . "/includes/sidebar.php";
             </tbody>
         </table>
     </div>
-</main>
 
 <?php include __DIR__ . "/includes/footer.php"; ?>
